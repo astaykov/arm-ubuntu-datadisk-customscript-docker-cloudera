@@ -9,8 +9,10 @@ A quick start template that installs Ubuntu, adds &amp; initializes data disk, i
     <img src="http://armviz.io/visualizebutton.png"/>
 </a>
 
-When the VM is up and running, connect to it using SSH client (i.e. Putty), your provided username and password.
+When the VM is up and running (it may take up to 40 minutes depending on the size you chose), connect to it using SSH client (i.e. Putty), your provided username and password.
+
 To start the docker image for cloudera enter the following command:
+
 ```
-sudo docker run --hostname=quickstart.cloudera --privileged=true -t -i -p 80:80 -p 8888:8888 -p 7180:7180  cloudera/cloudera:latest /usr/bin/docker-quickstart
+docker run --hostname=quickstart.cloudera --privileged=true -t -i -p 80:80 -p 8888:8888 -p 7180:7180  cloudera/cloudera:latest /usr/bin/docker-quickstart
 ```
