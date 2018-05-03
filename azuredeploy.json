@@ -5,8 +5,6 @@
     "vmSize": {
       "type": "string",
       "allowedValues": [
-        "Standard_B4m",
-        "Standard_B8m",
         "Standard_A4m_v2",
         "Standard_D4_v3",
         "Standard_D8_v3"
