@@ -37,7 +37,13 @@ sudo apt-get install wget
 #get cloudera image
 cd /datadisk
 sudo wget https://downloads.cloudera.com/demo_vm/docker/cloudera-quickstart-vm-5.13.0-0-beta-docker.tar.gz
-sudo tar -zxvf cloudera-quickstart-vm-5.13.0-0-beta-docker.tar.gz .
-docker import - cloudera/cloudera:latest < /datadisk/cloudera-quickstart-vm-*-docker*.tar
+sudo tar --strip-components=1 -zxvf cloudera-quickstart-vm-5.13.0-0-beta-docker.tar.gz
+sudo docker import - cloudera/cloudera:latest < /datadisk/cloudera-quickstart-vm-*-docker*.tar
 
+# add the user to the docker gorup to execute docker without sudo
+if [ "$1" != "" ]; then
+    sudo usermod -aG docker $1 
+else
+    echo "not adding user to the docker group"
+fi
 

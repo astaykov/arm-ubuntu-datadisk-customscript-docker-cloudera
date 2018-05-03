@@ -192,7 +192,7 @@
           "fileUris": [
             "[concat(variables('_artifactsLocation'), '/scripts/init.sh')]"
           ],
-          "commandToExecute": "./init.sh"
+          "commandToExecute": "[concat('./init.sh',' ',parameters('username'))]"
         }
       }
     }
