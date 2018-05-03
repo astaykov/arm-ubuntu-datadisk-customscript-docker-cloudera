@@ -5,14 +5,11 @@
     "vmSize": {
       "type": "string",
       "allowedValues": [
-        "Standard_A1",
-        "Standard_A2",
-        "Standard_A3",
-        "Standard_A4",
-        "Standard_D1",
-        "Standard_D2",
-        "Standard_D3",
-        "Standard_D4"
+        "Standard_B4ms",
+        "Standard_B8ms",
+        "Standard_A4m_v2",
+        "Standard_D4_v3",
+        "Standard_D8_v3"
       ],
       "metadata": {
         "description": "Size of vm"
@@ -35,36 +32,13 @@
       "metadata": {
         "description": "Unique DNS Name for the Public IP used to access the Virtual Machine."
       }
-    },
-    "_artifactsLocation": {
-      "defaultValue": "https://raw.githubusercontent.com/Azure/azure-quickstart-templates/master/201-customscript-extension-public-storage-on-ubuntu",
-      "type": "string",
-      "metadata": {
-        "description": "The base URI where artifacts required by this template are located. When the template is deployed using the accompanying scripts, a private location in the subscription will be used and this value will be automatically generated."
-      }
-    },
-    "_artifactsLocationSasToken": {
-      "defaultValue": "",
-      "type": "securestring",
-      "metadata": {
-        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated."
-      }
-    },
-    "commandToExecute": {
-      "type": "string",
-      "metadata": {
-        "description": "The command to execute."
-      }
     }
   },
   "variables": {
-    "extensionName": "CustomScript",
     "scenarioPrefix": "customscriptLinux",
-    "apiVersion": "2015-05-01-preview",
     "imagePublisher": "Canonical",
     "imageOffer": "UbuntuServer",
     "ubuntuOSVersion": "14.04.2-LTS",
-    "OSDiskName": "[concat(variables('scenarioPrefix'),'OSDisk')]",
     "nicName": "[concat(variables('scenarioPrefix'),'Nic')]",
     "vnetAddressPrefix": "10.0.0.0/16",
     "subnetName": "[concat(variables('scenarioPrefix'),'Subnet')]",
@@ -73,12 +47,23 @@
     "publicIPAddressName": "[concat(variables('scenarioPrefix'),'PublicIp')]",
     "publicIPAddressType": "Dynamic",
     "vmStorageAccountContainerName": "vhds",
+    "vmStorageAccountName": "[concat(uniqueString(resourceGroup().id), 'storage')]",
     "vmName": "[concat(variables('scenarioPrefix'),'VM')]",
     "virtualNetworkName": "[concat(variables('scenarioPrefix'),'Vnet')]",
     "vnetID": "[resourceId('Microsoft.Network/virtualNetworks',variables('virtualNetworkName'))]",
-    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]"
+    "subnetRef": "[concat(variables('vnetID'),'/subnets/',variables('subnetName'))]",
+    "_artifactsLocation":"https://raw.githubusercontent.com/astaykov/arm-ubuntu-datadisk-customscript-docker-cloudera/master"
   },
   "resources": [
+    {
+      "apiVersion": "2015-06-15",
+      "type": "Microsoft.Storage/storageAccounts",
+      "name": "[variables('vmStorageAccountName')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "accountType": "[variables('storageAccountType')]"
+      }
+    },
     {
       "apiVersion": "2015-05-01-preview",
       "type": "Microsoft.Network/publicIPAddresses",
@@ -144,7 +129,8 @@
       "name": "[variables('vmName')]",
       "location": "[resourceGroup().location]",
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]",
+        "[variables('vmStorageAccountName')]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -165,7 +151,18 @@
           "osDisk": {
             "caching": "ReadWrite",
             "createOption": "FromImage"
-          }
+          },
+          "dataDisks": [
+            {
+              "vhd": {
+                "uri": "[concat('http://', variables('vmStorageAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('dbVMSetting').datadisk, copyindex(1),'-1','.vhd')]"
+              },
+              "name": "[concat(variables('vmName'),'-data-disk1')]",
+              "diskSizeGB": 127,
+              "createOption": "Empty",
+              "lun": 0
+            }
+          ]
         },
         "networkProfile": {
           "networkInterfaces": [
@@ -191,9 +188,9 @@
         "autoUpgradeMinorVersion": true,
         "settings": {
           "fileUris": [
-            "[concat(parameters('_artifactsLocation'), '/scripts/hello.sh')]"
+            "[concat(variables('_artifactsLocation'), '/scripts/init.sh')]"
           ],
-          "commandToExecute": "[parameters('commandToExecute')]"
+          "commandToExecute": "./init.sh"
         }
       }
     }
