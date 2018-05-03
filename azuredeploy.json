@@ -149,14 +149,15 @@
           "osDisk": {
             "caching": "ReadWrite",
             "createOption": "FromImage",
+            "name":"[concat(variables('vmName'), '-os')]",
             "vhd": {
-              "uri": "[concat('http://', variables('vmStorageAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmName'), '-os','.vhd')]"
+              "uri": "[concat('http://', variables('vmStorageAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmName'), '-os.vhd')]"
             }
           },
           "dataDisks": [
             {
               "vhd": {
-                "uri": "[concat('http://', variables('vmStorageAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmName'), '-data-disk1','.vhd')]"
+                "uri": "[concat('http://', variables('vmStorageAccountName'), '.blob.core.windows.net/', variables('vmStorageAccountContainerName'), '/', variables('vmName'), '-data-disk1.vhd')]"
               },
               "name": "[concat(variables('vmName'),'-data-disk1')]",
               "diskSizeGB": 127,
